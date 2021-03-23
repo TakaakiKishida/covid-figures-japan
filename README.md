@@ -6,4 +6,5 @@
 ### The graph below is a transition Covid-19 of Japan
 
 Data sources:
+- The number of infections, deaths, and these cumulative totals from NHK (https://www3.nhk.or.jp/news/special/coronavirus/data-all/)
 - a
