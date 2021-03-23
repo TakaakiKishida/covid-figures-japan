@@ -5,5 +5,5 @@
 ### Comments Welcome!
 ### The graph below is a transition Covid-19 of Japan
 
-Data used in this repository can be obtained from:
+Data sources:
 - a
