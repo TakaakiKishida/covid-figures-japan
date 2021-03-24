@@ -7,4 +7,4 @@
 
 Data sources:
 - The number of infections, deaths, and these cumulative totals from NHK (https://www3.nhk.or.jp/news/special/coronavirus/data-all/)
-- from the Ministry of Health, Labour and Welfare (https://www.mhlw.go.jp/stf/covid-19/open-data.html)
+- from the Ministry of Health, Labour and Welfare (MHLW) (https://www.mhlw.go.jp/stf/covid-19/open-data.html)
