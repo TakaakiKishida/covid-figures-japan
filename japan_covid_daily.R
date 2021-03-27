@@ -1,4 +1,4 @@
-setwd("~/Documents/GitHub/japan-pop-by-age/data/")
+setwd("~/Documents/GitHub/covid-figures-japan/data/MHLW")
 
 if (!require("pacman")) install.packages("pacman")
 library(pacman) 
@@ -10,10 +10,9 @@ pacman::p_load(tidyverse, ggrepel, ggthemes)
 # ------------------------------------
 # import data
 
-pop0_14 <- read_csv("2019-ages-0-14.csv")
-pop15_64 <- read_csv("2019-ages-15-64.csv")
-pop65_above <- read_csv("2019-ages-65-above.csv")
-poptotal <- read_csv("2019-ages-total.csv")
+positive <- read_csv("pcr_positive_daily.csv")
+test <- read_csv("pcr_tested_daily.csv")
+severe <- read_csv("severe_daily.csv")
 
 
 

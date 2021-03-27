@@ -1,4 +1,4 @@
-## Stacked area graph for population in Japan
+## Line graph for Covid-19 cases in Japan
 ## *Last Updated: March 21, 2021*
 
 ### **Keywords: R, ggplot2, Covid-19, Japan**
