@@ -1,134 +1,156 @@
-setwd("~/Documents/GitHub/covid-figures-japan/data/MHLW")
+setwd("~/Documents/GitHub/covid-figures-japan/data")
 
 if (!require("pacman")) install.packages("pacman")
 library(pacman) 
 
 pacman::p_load(tidyverse, ggrepel, ggthemes)
 
+# devtools::install_github("slowkow/ggrepel")
+library(ggrepel)
+
 
 
 # ------------------------------------
 # import data
 
-positive <- read_csv("pcr_positive_daily.csv")
-test <- read_csv("pcr_tested_daily.csv")
-severe <- read_csv("severe_daily.csv")
-
+positive <- read_csv("MHLW/pcr_positive_daily.csv")
+test <- read_csv("MHLW/pcr_tested_daily.csv")
+severe <- read_csv("MHLW/severe_daily.csv")
+prefec <- read_csv("NHK/nhk_news_covid19_prefectures_daily_data.csv")
 
 
 # ------------------------------------
 # processing
 
-# pop <- bind_rows(pop0_14, pop15_64, pop65_above, poptotal)
-# category <- c("age-0-14", "age-15-64", "age-65-above", "age-total")
-# 
-# pop <- pop %>% 
-#   dplyr::rename(cname = "Country Name") %>% 
-#   dplyr::filter(cname == "Japan") %>% 
-#   dplyr::mutate(category = category) %>% 
-#   dplyr::relocate(cname, category) %>% 
-#   dplyr::select(-"Indicator Name", -"Indicator Code", -"Country Code", -"2020")
+positive; test; severe
+names(positive); names(test); names(severe)
+tail(positive); tail(test); tail(severe)
 
-# convert to long tables
+d1 <- dplyr::left_join(positive, test, by = "日付")
 
-pop_1 <- pop0_14 %>%
-  dplyr::rename(cname = "Country Name") %>%
-  dplyr::filter(cname == "Japan") %>%
-  dplyr::mutate(category = "age-0-14") %>% 
-  dplyr::relocate(category) %>% 
-  dplyr::select(-"cname", -"Indicator Name", -"Indicator Code", -"Country Code", -"2020") %>% 
-  pivot_longer(starts_with(c("19", "20")),
-               names_to = "year",
-               values_to = "population")
+cases <- dplyr::left_join(d1, severe, by = "日付")
 
-pop_2 <- pop15_64 %>%
-  dplyr::rename(cname = "Country Name") %>%
-  dplyr::filter(cname == "Japan") %>%
-  dplyr::mutate(category = "age-15-64") %>% 
-  dplyr::relocate(category) %>% 
-  dplyr::select(-"cname", -"Indicator Name", -"Indicator Code", -"Country Code", -"2020") %>% 
-  pivot_longer(starts_with(c("19", "20")),
-               names_to = "year",
-               values_to = "population")
-
-pop_3 <- pop65_above %>%
-  dplyr::rename(cname = "Country Name") %>%
-  dplyr::filter(cname == "Japan") %>%
-  dplyr::mutate(category = "age-65-above") %>% 
-  dplyr::relocate(category) %>% 
-  dplyr::select(-"cname", -"Indicator Name", -"Indicator Code", -"Country Code", -"2020") %>% 
-  pivot_longer(starts_with(c("19", "20")),
-               names_to = "year",
-               values_to = "population")
-
-pop_4 <- poptotal %>%
-  dplyr::rename(cname = "Country Name") %>%
-  dplyr::filter(cname == "Japan") %>%
-  dplyr::mutate(category = "age-total") %>% 
-  dplyr::relocate(category) %>% 
-  dplyr::select(-"cname", -"Indicator Name", -"Indicator Code", -"Country Code", -"2020") %>% 
-  pivot_longer(starts_with(c("19", "20")),
-               names_to = "year",
-               values_to = "population")
-
-# as the result below suggests, total population may be incorrect
-(pop_1$population + pop_2$population + pop_3$population) == pop_4$population
+cases <- cases %>% 
+  dplyr::select(-X3, -X4) %>% 
+  dplyr::rename(date = "日付",
+                positive = "PCR 検査陽性者数(単日)",
+                pcr = "PCR 検査実施件数(単日)",
+                severe = "重症者数") %>% 
+  dplyr::filter(date >= "2020/2/5") %>% 
+  dplyr::mutate(prefec = "Total")
+  
 
 
-# append long data
-popage <- bind_rows(pop_1, pop_2, pop_3)
+prefec
+names(prefec)
 
-is.numeric(popage$year)
-is.numeric(popage$population)
+prefec <- prefec %>% 
+  dplyr::rename(date = "日付",
+                positive = "各地の感染者数_1日ごとの発表数",
+                prefec = "都道府県名") %>% 
+  dplyr::filter(date >= "2020/2/5") %>% 
+  dplyr::select(date, positive, prefec) %>% 
+  dplyr::mutate(main = recode(prefec,
+                               "北海道"   = 1,
+                               "東京都"   = 1,
+                               "神奈川県" = 1,
+                               "千葉県"   = 1,
+                               "埼玉県"   = 1,
+                               "愛知県"   = 1,
+                               "大阪府"   = 1,
+                               "兵庫県"   = 1,
+                               "福岡県"   = 1,
+                               .default   = 0)) %>% 
+  dplyr::mutate(prefec = recode(prefec,
+                                "北海道"   = "Hokkaido",
+                                "東京都"   = "Tokyo",
+                                "神奈川県" = "Kanagawa",
+                                "千葉県"   = "Chiba",
+                                "埼玉県"   = "Saitama",
+                                "愛知県"   = "Aichi",
+                                "大阪府"   = "Osaka",
+                                "兵庫県"   = "Hyogo",
+                                "福岡県"   = "Fukuoka"))
+                                # .default  = "")) %>% 
 
-popage$year <- as.numeric(popage$year)
+
+cases <- bind_rows(cases, prefec)
+
+cases_main <- cases %>% 
+  dplyr::filter(main == 1) %>% 
+  dplyr::select(date, positive, prefec) 
+
+cases_others <- cases %>% 
+  dplyr::filter(main == 0) %>% 
+  dplyr::select(date, positive, prefec) 
 
 
 
 # ------------------------------------
 # visualizing -- prep
 
-options(scipen = 999)
-year_range <- c(1960, 1970, 1980, 1990, 2000, 2010, 2019)
-
-h_dash_lines_1 <- geom_segment(
-  aes(y = 25000, yend = 25000, 
-      x = 1960, xend = 2019),
-  color = "black", linetype = 'dashed', alpha = 0.1)
-
-h_dash_lines_2 <- geom_segment(
-  aes(y = 50000, yend = 50000, 
-      x = 1960, xend = 2019),
-  color = "black", linetype = 'dashed', alpha = 0.1)
-
-h_dash_lines_3 <- geom_segment(
-  aes(y = 75000, yend = 75000, 
-      x = 1960, xend = 2019),
-  color = "black", linetype = 'dashed', alpha = 0.1)
-
-h_dash_lines_4 <- geom_segment(
-  aes(y = 100000, yend = 100000, 
-      x = 1960, xend = 2019),
-  color = "black", linetype = 'dashed', alpha = 0.1)
-
-h_dash_lines_5 <- geom_segment(
-  aes(y = 125000, yend = 125000, 
-      x = 1960, xend = 2019),
-  color = "black", linetype = 'dashed', alpha = 0.1)
-
-popage %>% filter(year == 2019)
 
 
 
 # ------------------------------------
 # visualizing -- ggplot
+cases_fig1
 
-popfig1 <- ggplot() + 
-  geom_area(data = popage, 
-            aes(x = year, y = population / 1000,
-                fill = forcats::fct_rev(category)),
-                color = "white",
-            alpha = 0.7) +
+cases_fig1 <- ggplot() + 
+  geom_line(
+    data = cases_main, 
+    aes(x = date, y = positive,
+        group = prefec,
+        color = prefec)
+        # group = forcats::fct_rev(prefec))
+    ) +
+  geom_line(
+    data = cases_others, 
+    aes(x = date, y = positive,
+        # alpha = 0.5,
+        group = prefec,
+        color = "red")
+    ) +
+  
+# cases_fig1
+
+  geom_text_repel(
+    data = cases_main %>% filter(date == "2021/3/27"), 
+    aes(x = date, y = positive,
+        label = prefec),
+    # family = "Avenir Next Condensed",
+    # nudge_x = 100,
+    fontface = "bold",
+    # size = 8,
+    direction = "y",
+    xlim = c("2021/3/27", NA),
+    hjust = 0,
+    segment.size = .7,
+    segment.alpha = .5,
+    segment.linetype = "dotted",
+    box.padding = .4,
+    segment.curvature = -0.1,
+    segment.ncp = 3,
+    segment.angle = 20
+  ) +
+  labs(title = "Daily Covid-19 Positive Cases in Japan",
+       caption = "Source: Japan Broadcasting Corporation",
+       x = "Date",
+       y = "Positive Cases") +
+  theme_minimal() + theme(panel.grid=element_blank()) +
+  theme(text = element_text(family = "Optima"),
+        plot.title = element_text(size = 24),
+        plot.caption = element_text(hjust = 0),
+        axis.text = element_text(color = "black", size = 14),
+        axis.title.y = element_text(size = 18),
+        axis.title.x = element_blank(),
+        plot.background = element_rect(fill = "#f5f5f2"),
+        legend.position = "none",
+        plot.margin = margin(25, 25, 10, 25)) 
+  
+cases_fig1
+
+
   h_dash_lines_1 + h_dash_lines_2 + h_dash_lines_3 + 
   h_dash_lines_4 + h_dash_lines_5 +
   labs(title = "Age Distribution of Population in Japan, 1960-2019",
@@ -190,7 +212,7 @@ popfig1 <- ggplot() +
   
   
 
-popfig1
+cases_fig1
 
 setwd("~/Documents/GitHub/japan-pop-by-age/")
 ggsave(popfig1, filename = "popfig1.png", 
