@@ -3,7 +3,7 @@ setwd("~/Documents/GitHub/covid-figures-japan/data")
 if (!require("pacman")) install.packages("pacman")
 library(pacman) 
 
-pacman::p_load(tidyverse, ggrepel, ggthemes)
+pacman::p_load(tidyverse, ggrepel, ggthemes, lubridate)
 
 # devtools::install_github("slowkow/ggrepel")
 library(ggrepel)
@@ -36,10 +36,13 @@ cases <- cases %>%
                 positive = "PCR 検査陽性者数(単日)",
                 pcr = "PCR 検査実施件数(単日)",
                 severe = "重症者数") %>% 
-  dplyr::filter(date >= "2020/2/5") %>% 
-  dplyr::mutate(prefec = "Total")
-  
+  dplyr::mutate(date = as.Date(date, format = "%Y/%m/%d"),
+                prefec = "Total") %>% 
+  dplyr::filter(date >= "2020-2-5") 
 
+
+# cases[order(cases$date, format = "%Y-%m-%d"),]
+# cases[order(as.Date(cases$date, format="%Y-%m-%d")),]
 
 prefec
 names(prefec)
@@ -48,7 +51,8 @@ prefec <- prefec %>%
   dplyr::rename(date = "日付",
                 positive = "各地の感染者数_1日ごとの発表数",
                 prefec = "都道府県名") %>% 
-  dplyr::filter(date >= "2020/2/5") %>% 
+  dplyr::mutate(date = as.Date(date, format = "%Y/%m/%d")) %>%
+  dplyr::filter(date >= "2020-2-5") %>% 
   dplyr::select(date, positive, prefec) %>% 
   dplyr::mutate(main = recode(prefec,
                                "北海道"   = 1,
@@ -70,19 +74,33 @@ prefec <- prefec %>%
                                 "愛知県"   = "Aichi",
                                 "大阪府"   = "Osaka",
                                 "兵庫県"   = "Hyogo",
-                                "福岡県"   = "Fukuoka"))
+                                "福岡県"   = "Fukuoka")) 
                                 # .default  = "")) %>% 
 
+class(cases$date)
+class(prefec$date)
+
+# cases$date <- as.Date(cases$date, format = "%Y/%m/%d")
+# prefec$date <- as.Date(prefec$date, format = "%Y/%m/%d")
 
 cases <- bind_rows(cases, prefec)
+cases$prefec
 
 cases_main <- cases %>% 
   dplyr::filter(main == 1) %>% 
-  dplyr::select(date, positive, prefec) 
+  dplyr::select(date, positive, prefec) %>% 
+  tidyr::separate(col = date, 
+                  into = c("year", "month", "day"), 
+                  sep = "-", 
+                  remove = FALSE)
 
 cases_others <- cases %>% 
   dplyr::filter(main == 0) %>% 
-  dplyr::select(date, positive, prefec) 
+  dplyr::select(date, positive, prefec) %>% 
+  tidyr::separate(col = date, 
+                  into = c("year", "month", "day"), 
+                  sep = "-", 
+                  remove = FALSE)
 
 
 
@@ -115,7 +133,7 @@ cases_fig1 <- ggplot() +
 # cases_fig1
 
   geom_text_repel(
-    data = cases_main %>% filter(date == "2021/3/27"), 
+    data = cases_main %>% filter(date == "2021-03-27"), 
     aes(x = date, y = positive,
         label = prefec),
     # family = "Avenir Next Condensed",
@@ -123,7 +141,7 @@ cases_fig1 <- ggplot() +
     fontface = "bold",
     # size = 8,
     direction = "y",
-    xlim = c("2021/3/27", NA),
+    # xlim = c("2021-03-27", NA),
     hjust = 0,
     segment.size = .7,
     segment.alpha = .5,
@@ -151,6 +169,17 @@ cases_fig1 <- ggplot() +
 cases_fig1
 
 
+cases_fig1
+
+setwd("~/Documents/GitHub/covid-figures-japan/")
+ggsave(cases_fig1, filename = "cases_fig1.png", 
+       width = 10, height = 6)
+
+
+
+
+# ------------------------------------
+
   h_dash_lines_1 + h_dash_lines_2 + h_dash_lines_3 + 
   h_dash_lines_4 + h_dash_lines_5 +
   labs(title = "Age Distribution of Population in Japan, 1960-2019",
@@ -166,7 +195,7 @@ cases_fig1
   scale_x_continuous(limits = c(1960, 2030),
                      expand = c(0, 0),
                      breaks = year_range) +
-  theme_minimal() + theme(panel.grid=element_blank()) +
+  theme_minimal() + theme(panel.grid = element_blank()) +
   theme(text = element_text(family = "Optima"),
         plot.title = element_text(size = 24),
         plot.caption = element_text(hjust = 0, size = 14),
@@ -210,13 +239,5 @@ cases_fig1
            x = 2016, y = 121500,
            color = "white", family = "Optima", size = 5) 
   
-  
-
-cases_fig1
-
-setwd("~/Documents/GitHub/japan-pop-by-age/")
-ggsave(popfig1, filename = "popfig1.png", 
-       width = 10, height = 6)
-
 
 # ------------------------------------
