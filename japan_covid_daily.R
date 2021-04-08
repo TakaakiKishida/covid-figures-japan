@@ -55,26 +55,26 @@ prefec <- prefec %>%
   dplyr::filter(date >= "2020-2-5") %>% 
   dplyr::select(date, positive, prefec) %>% 
   dplyr::mutate(main = recode(prefec,
-                               "北海道"   = 1,
+                               # "北海道"   = 1,
                                "東京都"   = 1,
                                "神奈川県" = 1,
-                               "千葉県"   = 1,
-                               "埼玉県"   = 1,
-                               "愛知県"   = 1,
+                               # "千葉県"   = 1,
+                               # "埼玉県"   = 1,
+                               # "愛知県"   = 1,
                                "大阪府"   = 1,
-                               "兵庫県"   = 1,
-                               "福岡県"   = 1,
+                               # "兵庫県"   = 1,
+                               # "福岡県"   = 1,
                                .default   = 0)) %>% 
   dplyr::mutate(prefec = recode(prefec,
-                                "北海道"   = "Hokkaido",
+                                # "北海道"   = "Hokkaido",
                                 "東京都"   = "Tokyo",
                                 "神奈川県" = "Kanagawa",
-                                "千葉県"   = "Chiba",
-                                "埼玉県"   = "Saitama",
-                                "愛知県"   = "Aichi",
-                                "大阪府"   = "Osaka",
-                                "兵庫県"   = "Hyogo",
-                                "福岡県"   = "Fukuoka")) 
+                                # "千葉県"   = "Chiba",
+                                # "埼玉県"   = "Saitama",
+                                # "愛知県"   = "Aichi",
+                                "大阪府"   = "Osaka")) 
+                                # "兵庫県"   = "Hyogo",
+                                # "福岡県"   = "Fukuoka"
                                 # .default  = "")) %>% 
 
 class(cases$date)
@@ -113,49 +113,39 @@ cases_others <- cases %>%
 # ------------------------------------
 # visualizing -- ggplot
 cases_fig1
+resultcolors <- c("brown4", "dodgerblue1", "dodgerblue4")
+
 
 cases_fig1 <- ggplot() + 
-  geom_line(
-    data = cases_main, 
-    aes(x = date, y = positive,
-        group = prefec,
-        color = prefec)
-        # group = forcats::fct_rev(prefec))
-    ) +
-  geom_line(
-    data = cases_others, 
-    aes(x = date, y = positive,
-        # alpha = 0.5,
-        group = prefec,
-        color = "red")
-    ) +
-  
-# cases_fig1
-
-  geom_text_repel(
-    data = cases_main %>% filter(date == "2021-03-27"), 
-    aes(x = date, y = positive,
-        label = prefec),
-    # family = "Avenir Next Condensed",
-    # nudge_x = 100,
-    fontface = "bold",
-    # size = 8,
-    direction = "y",
-    # xlim = c("2021-03-27", NA),
-    hjust = 0,
-    segment.size = .7,
-    segment.alpha = .5,
-    segment.linetype = "dotted",
-    box.padding = .4,
-    segment.curvature = -0.1,
-    segment.ncp = 3,
-    segment.angle = 20
-  ) +
+  geom_line(data = cases_main,
+            aes(x = date, y = positive, 
+                group = prefec, color = prefec)) +
+  scale_color_manual(values = resultcolors) +
+  # group = forcats::fct_rev(prefec))) +
+  geom_line(data = cases_others,
+            aes(x = date, y = positive, 
+                group = prefec), 
+            color = "black", alpha = 0.3) +
+  geom_rect(aes(xmin = as.Date("2020-04-07"), xmax = as.Date("2020-05-25"),
+                ymin = 0, ymax = 2500),
+            fill = "darkgrey", color = NA, alpha = 0.4) +
+  geom_rect(aes(xmin = as.Date("2021-01-08"), xmax = as.Date("2021-03-21"),
+                ymin = 0, ymax = 2500),
+            fill = "darkgrey", color = NA, alpha = 0.4) +
+  # cases_fig1
   labs(title = "Daily Covid-19 Positive Cases in Japan",
-       caption = "Source: Japan Broadcasting Corporation",
+       caption = "Source: Japan Broadcasting Corporation. Note: SoE refers to the State of Emergency",
        x = "Date",
        y = "Positive Cases") +
-  theme_minimal() + theme(panel.grid=element_blank()) +
+  scale_x_date(limits = c(as.Date("2020-02-02"), as.Date("2021-05-31")),
+               expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 2500),
+                     breaks = seq(0, 2500, 500),
+                     expand = c(0, 0),
+                     # position = "right",
+                     labels = scales::comma) +
+  # scale_y_continuous(position = "right") +
+  theme_minimal() + 
   theme(text = element_text(family = "Optima"),
         plot.title = element_text(size = 24),
         plot.caption = element_text(hjust = 0),
@@ -163,17 +153,49 @@ cases_fig1 <- ggplot() +
         axis.title.y = element_text(size = 18),
         axis.title.x = element_blank(),
         plot.background = element_rect(fill = "#f5f5f2"),
+        # panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color = "grey80",
+                                          linetype = "dashed"),
         legend.position = "none",
-        plot.margin = margin(25, 25, 10, 25)) 
-  
-cases_fig1
+        plot.margin = margin(25, 25, 10, 25)) +
+  geom_text_repel(data = cases_main %>% filter(date == "2021-03-27"), 
+                  aes(x = date, y = positive, label = prefec, color = prefec),
+                  family = "Avenir Next Condensed",
+                  nudge_x = 100,
+                  fontface = "bold",
+                  direction = "y",
+                  hjust = 0,
+                  segment.size = 0.7,
+                  segment.alpha = 0.5,
+                  segment.linetype = "dotted",
+                  box.padding = 0.4,
+                  segment.curvature = -0.1,
+                  segment.ncp = 3,
+                  segment.angle = 20) +
+  # text annotations
+  annotate("text", x = as.Date("2020-04-30"), y = 1500,
+           label = "1st SoE \n Apr 7 to May 25",
+           family = "Avenir Next Condensed",
+           size = 4,
+           color = "grey40",
+           hjust = 0.5) + 
+  annotate("text", x = as.Date("2021-02-12"), y = 1500,
+           label = "2nd SoE \n Jan 8 to Mar 21",
+           family = "Avenir Next Condensed",
+           size = 4,
+           color = "grey40",
+           hjust = 0.5) 
 
 
 cases_fig1
+
+
+
 
 setwd("~/Documents/GitHub/covid-figures-japan/")
-ggsave(cases_fig1, filename = "cases_fig1.png", 
-       width = 10, height = 6)
+ggsave(cases_fig1, filename = "cases_fig1.png", width = 10, height = 6)
 
 
 
