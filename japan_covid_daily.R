@@ -134,11 +134,16 @@ cases_fig1 <- ggplot() +
             fill = "darkgrey", color = NA, alpha = 0.4) +
   # cases_fig1
   labs(title = "Daily Covid-19 Positive Cases in Japan",
-       caption = "Source: Japan Broadcasting Corporation. Note: SoE refers to the State of Emergency",
+       caption = "Source: Japan Broadcasting Corporation. Note: SoE refers to the State of Emergency.",
        x = "Date",
        y = "Positive Cases") +
   scale_x_date(limits = c(as.Date("2020-02-02"), as.Date("2021-05-31")),
-               expand = c(0, 0)) +
+               expand = c(0, 0),
+               date_breaks = "2 month", 
+               date_labels = "%b") +
+  # scale_x_datetime(limits = lims, 
+  #                  date_breaks = "month", 
+  #                  date_labels = "%m-%d") +
   scale_y_continuous(limits = c(0, 2500),
                      breaks = seq(0, 2500, 500),
                      expand = c(0, 0),
@@ -147,10 +152,10 @@ cases_fig1 <- ggplot() +
   # scale_y_continuous(position = "right") +
   theme_minimal() + 
   theme(text = element_text(family = "Optima"),
-        plot.title = element_text(size = 24),
+        plot.title = element_text(size = 22),
         plot.caption = element_text(hjust = 0),
-        axis.text = element_text(color = "black", size = 14),
-        axis.title.y = element_text(size = 18),
+        axis.text = element_text(color = "black", size = 12),
+        axis.title.y = element_text(size = 14),
         axis.title.x = element_blank(),
         plot.background = element_rect(fill = "#f5f5f2"),
         # panel.background = element_rect(fill = "white"),
@@ -175,18 +180,31 @@ cases_fig1 <- ggplot() +
                   segment.ncp = 3,
                   segment.angle = 20) +
   # text annotations
-  annotate("text", x = as.Date("2020-04-30"), y = 1500,
+  annotate("text", x = as.Date("2020-05-01"), y = 2250,
            label = "1st SoE \n Apr 7 to May 25",
            family = "Avenir Next Condensed",
            size = 4,
            color = "grey40",
            hjust = 0.5) + 
-  annotate("text", x = as.Date("2021-02-12"), y = 1500,
+  annotate("text", x = as.Date("2021-02-12"), y = 2250,
            label = "2nd SoE \n Jan 8 to Mar 21",
            family = "Avenir Next Condensed",
            size = 4,
            color = "grey40",
-           hjust = 0.5) 
+           hjust = 0.5) +
+  annotate("text", x = as.Date("2020-12-25"), y = 2400,
+           label = "2021",
+           family = "Avenir Next Condensed",
+           size = 5,
+           color = "black",
+           hjust = 0.5) +
+  annotate("text", x = as.Date("2020-02-02"), y = 2400,
+           label = "2020",
+           family = "Avenir Next Condensed",
+           size = 5,
+           color = "black",
+           hjust = 0)
+  
 
 
 cases_fig1
@@ -196,11 +214,6 @@ cases_fig1
 
 setwd("~/Documents/GitHub/covid-figures-japan/")
 ggsave(cases_fig1, filename = "cases_fig1.png", width = 10, height = 6)
-
-
-
-
-
 # ------------------------------------
 
   h_dash_lines_1 + h_dash_lines_2 + h_dash_lines_3 + 
