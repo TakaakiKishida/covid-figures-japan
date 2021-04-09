@@ -1,5 +1,5 @@
 ## Line graph for Covid-19 cases in Japan
-## *Last Updated: March 21, 2021*
+## *Last Updated: April 9, 2021*
 
 ### **Keywords: R, ggplot2, Covid-19, Japan**
 ### Comments Welcome!
