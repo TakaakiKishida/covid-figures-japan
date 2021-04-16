@@ -126,9 +126,11 @@ cases_fig1 <- ggplot() +
             aes(x = date, y = positive, 
                 group = prefec), 
             color = "black", alpha = 0.3) +
+  # 1st State of Emergency
   geom_rect(aes(xmin = as.Date("2020-04-07"), xmax = as.Date("2020-05-25"),
                 ymin = 0, ymax = 2500),
             fill = "darkgrey", color = NA, alpha = 0.4) +
+  # 2nd State of Emergency
   geom_rect(aes(xmin = as.Date("2021-01-08"), xmax = as.Date("2021-03-21"),
                 ymin = 0, ymax = 2500),
             fill = "darkgrey", color = NA, alpha = 0.4) +
@@ -137,7 +139,7 @@ cases_fig1 <- ggplot() +
        caption = "Source: Japan Broadcasting Corporation. Note: SoE refers to the State of Emergency.",
        x = "Date",
        y = "Positive Cases") +
-  scale_x_date(limits = c(as.Date("2020-02-02"), as.Date("2021-05-31")),
+  scale_x_date(limits = c(as.Date("2020-02-02"), as.Date("2021-05-30")),
                expand = c(0, 0),
                date_breaks = "2 month", 
                date_labels = "%b") +
@@ -165,7 +167,7 @@ cases_fig1 <- ggplot() +
                                           linetype = "dashed"),
         legend.position = "none",
         plot.margin = margin(25, 25, 10, 25)) +
-  geom_text_repel(data = cases_main %>% filter(date == "2021-03-27"), 
+  geom_text_repel(data = cases_main %>% filter(date == "2021-04-15"), 
                   aes(x = date, y = positive, label = prefec, color = prefec),
                   family = "Avenir Next Condensed",
                   nudge_x = 100,
