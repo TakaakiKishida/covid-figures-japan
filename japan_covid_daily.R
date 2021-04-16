@@ -210,8 +210,6 @@ cases_fig1 <- ggplot() +
 cases_fig1
 
 
-
-
 setwd("~/Documents/GitHub/covid-figures-japan/")
 ggsave(cases_fig1, filename = "cases_fig1.png", width = 10, height = 6)
 # ------------------------------------
