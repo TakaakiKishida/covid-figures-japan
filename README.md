@@ -1,9 +1,8 @@
-## Line graph for Covid-19 cases in Japan
+## Transition of Covid-19 Cases in Japan
 ## *Last Updated: April 17, 2021*
 
 ### **Keywords: R, ggplot2, Covid-19, Japan**
 ### Comments Welcome!
-### The graph below is a transition Covid-19 of Japan
 
 Data sources:
 - Japan Broadcasting Corporation (NHK) (https://www3.nhk.or.jp/news/special/coronavirus/data-all/)
